@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <AssemblyName>FrameGlass</AssemblyName>
+    <RootNamespace>FrameGlass</RootNamespace>
+    <!-- Shown in the About tab. Bump it when you ship. -->
+    <Version>1.0.0</Version>
+    <Product>FrameGlass</Product>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.21" />
+  </ItemGroup>
+
+  <!--
+    The UI probe lives in ui-probe/ and compiles this project's sources on purpose. This project uses
+    the SDK's default **/*.cs globbing, so without these three lines its four .cs files would be
+    compiled straight into the shipping build - which would give the app two Main methods and a
+    reference to System.Windows.Forms.Design. Every Remove is listed explicitly rather than relying
+    on .cs alone: the probe's csproj, .gitignore and screenshots would otherwise be picked up as
+    content as well.
+  -->
+  <ItemGroup>
+    <Compile Remove="ui-probe/**" />
+    <None Remove="ui-probe/**" />
+    <EmbeddedResource Remove="ui-probe/**" />
+    <Content Remove="ui-probe/**" />
+  </ItemGroup>
+
+  <!--
+    tmp/ is git-ignored scratch space. Scratch .cs files there must never be compiled into the app,
+    so they are removed from the default **/*.cs glob the same way ui-probe/ is.
+  -->
+  <ItemGroup>
+    <Compile Remove="tmp/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="config.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('config.json')" />
+    <!--
+      Embedded, not copied next to the exe. The tray, the windows and the taskbar must all show the
+      same image, and the only way to guarantee that is for there to be one image, inside the
+      assembly, that cannot go missing or be replaced by a different file of the same name. The
+      LogicalName is fixed so both this project and the probe can load it by the same string.
+    -->
+    <EmbeddedResource Include="app.ico" LogicalName="FrameGlass.app.ico" />
+    <EmbeddedResource Include="assets/FluentSystemIcons-Subset.ttf" LogicalName="FrameGlass.FluentIcons.ttf" />
+  </ItemGroup>
+
+</Project>
+

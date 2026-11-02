@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Dev-only harness that lives in the app repository but is not part of the app.
+
+    It compiles the app's sources - ..\*.cs, non-recursive, so this folder is not swept up
+    in turn - and supplies its own entry point, so Program.Main and the elevation gate in it
+    are never the code that runs. That is what lets Composer.SelfTest and the whole settings
+    form be driven from an unelevated shell, which the shipping exe cannot be.
+
+    The app project excludes this folder explicitly. It uses the SDK's default **/*.cs
+    globbing, so a probe source file inside it would otherwise be compiled into the shipping
+    build - two Main methods, and a dependency on System.Windows.Forms.Design.
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StartupObject>UiProbe.Entry</StartupObject>
+    <AssemblyName>UiProbe</AssemblyName>
+    <RootNamespace>UiProbe</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>$(NoWarn);CS0108</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Entry.cs" />
+    <Compile Include="LeakTest.cs" />
+    <Compile Include="Bisect.cs" />
+    <Compile Include="Perf.cs" />
+    <Compile Include="Drag.cs" />
+    <Compile Include="Layout.cs" />
+    <Compile Include="Navigation.cs" />
+    <Compile Include="Fixes.cs" />
+    <Compile Include="Hero.cs" />
+    <Compile Include="RealDpi.cs" />
+    <Compile Include="..\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.21" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\config.json" Link="config.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\config.json')" />
+    <None Include="..\profiles.json" Link="profiles.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\profiles.json')" />
+    <!-- Same logical name as the app uses, so Program.LoadIcon finds it here too. -->
+    <EmbeddedResource Include="..\app.ico" LogicalName="FrameGlass.app.ico" Condition="Exists('..\app.ico')" />
+    <!-- Same logical name as the app uses, so the Fluent icon font loads here too. -->
+    <EmbeddedResource Include="..\assets\FluentSystemIcons-Subset.ttf" LogicalName="FrameGlass.FluentIcons.ttf" />
+  </ItemGroup>
+
+</Project>
